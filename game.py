@@ -2,6 +2,7 @@ from util import *
 import time, os
 import traceback
 import sys
+import pdb
 
 #######################
 # Parts worth reading #
@@ -36,8 +37,13 @@ class Directions:
                    EAST:  NORTH,
                    WEST:  SOUTH,
                    STOP:  STOP}
-
-    RIGHT =      dict([(y,x) for x, y in LEFT.items()])
+#    LEFT_ITEMS = [('West', 'South'),
+#                 ('Stop', 'Stop'),
+#                 ('East', 'North'),
+#                 ('North', 'West'),
+#                 ('South', 'East')]
+    LEFT_ITEMS = sorted(LEFT.items(), key=lambda x:x[0])
+    RIGHT =      dict([(y,x) for x, y in LEFT_ITEMS])
 
     REVERSE = {NORTH: SOUTH,
                SOUTH: NORTH,
@@ -211,6 +217,7 @@ class Grid:
         bits = [self.width, self.height]
         currentInt = 0
         for i in range(self.height * self.width):
+            print(bit)
             bit = self.CELLS_PER_INT - (i % self.CELLS_PER_INT) - 1
             x, y = self._cellIndexToPosition(i)
             if self[x][y]:
@@ -271,8 +278,13 @@ class Actions:
                    Directions.WEST:  (-1, 0),
                    Directions.STOP:  (0, 0)}
 
-    _directionsAsList = _directions.items()
+    _directionsAsList = sorted(_directions.items(), key=lambda x:x[0])
 
+    #_directionsAsList = [('West', (-1, 0)),
+     #('Stop', (0, 0)),
+     #('East', (1, 0)),
+     #('North', (0, 1)),
+     #('South', (0, -1))]
     TOLERANCE = .001
 
     def reverseDirection(action):
@@ -503,10 +515,10 @@ class Game:
         self.totalAgentTimes = [0 for agent in agents]
         self.totalAgentTimeWarnings = [0 for agent in agents]
         self.agentTimeout = False
-        try:
-            import cStringIO
-        except:
-            from io import StringIO
+#        try:
+#            import cStringIO
+#        except:
+#            from io import StringIO
         self.agentOutput = [StringIO() for agent in agents]
 
     def getProgress(self):
@@ -526,6 +538,7 @@ class Game:
     OLD_STDERR = None
 
     def mute(self, agentIndex):
+
         if not self.muteAgents: return
         global OLD_STDOUT, OLD_STDERR
         import cStringIO
@@ -548,7 +561,6 @@ class Game:
         """
         self.display.initialize(self.state.data)
         self.numMoves = 0
-
         ###self.display.initialize(self.state.makeObservation(1).data)
         # inform learning agents of the game start
         for i in range(len(self.agents)):
@@ -557,7 +569,7 @@ class Game:
                 self.mute(i)
                 # this is a null agent, meaning it failed to load
                 # the other team wins
-                print >>sys.stderr, "Agent %d failed to load" % i
+                print("Agent %d failed to load" % i, file=sys.stderr)
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
@@ -572,7 +584,7 @@ class Game:
                             time_taken = time.time() - start_time
                             self.totalAgentTimes[i] += time_taken
                         except TimeoutFunctionException:
-                            print >>sys.stderr, "Agent %d ran out of time on startup!" % i
+                            print("Agent %d ran out of time on startup!" % i, file=sys.stderr)
                             self.unmute()
                             self.agentTimeout = True
                             self._agentCrash(i, quiet=True)
@@ -629,7 +641,7 @@ class Game:
                             raise TimeoutFunctionException()
                         action = timed_func( observation )
                     except TimeoutFunctionException:
-                        print >>sys.stderr, "Agent %d timed out on a single move!" % agentIndex
+                        print("Agent %d timed out on a single move!" % agentIndex, file=sys.stderr)
                         self.agentTimeout = True
                         self._agentCrash(agentIndex, quiet=True)
                         self.unmute()
@@ -639,9 +651,9 @@ class Game:
 
                     if move_time > self.rules.getMoveWarningTime(agentIndex):
                         self.totalAgentTimeWarnings[agentIndex] += 1
-                        print >>sys.stderr, "Agent %d took too long to make a move! This is warning %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex])
+                        print("Agent %d took too long to make a move! This is warning %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
                         if self.totalAgentTimeWarnings[agentIndex] > self.rules.getMaxTimeWarnings(agentIndex):
-                            print >>sys.stderr, "Agent %d exceeded the maximum number of warnings: %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex])
+                            print("Agent %d exceeded the maximum number of warnings: %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
                             self.agentTimeout = True
                             self._agentCrash(agentIndex, quiet=True)
                             self.unmute()
@@ -650,7 +662,7 @@ class Game:
                     self.totalAgentTimes[agentIndex] += move_time
                     #print "Agent: %d, time: %f, total: %f" % (agentIndex, move_time, self.totalAgentTimes[agentIndex])
                     if self.totalAgentTimes[agentIndex] > self.rules.getMaxTotalTime(agentIndex):
-                        print >>sys.stderr, "Agent %d ran out of time! (time: %1.2f)" % (agentIndex, self.totalAgentTimes[agentIndex])
+                        print("Agent %d ran out of time! (time: %1.2f)" % (agentIndex, self.totalAgentTimes[agentIndex]), file=sys.stderr)
                         self.agentTimeout = True
                         self._agentCrash(agentIndex, quiet=True)
                         self.unmute()

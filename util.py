@@ -3,7 +3,6 @@ import inspect
 import heapq, random
 from io import StringIO
 
-
 class FixedRandom:
     def __init__(self):
         fixedState = (3, (2147483648, 507801126, 683453281, 310439348, 2597246090, \
@@ -261,7 +260,7 @@ class Counter(dict):
         Returns the key with the highest value.
         """
         if len(self.keys()) == 0: return None
-        all = self.items()
+        all = sorted(self.items(), key=lambda x:x[0])
         values = [x[1] for x in all]
         maxIndex = values.index(max(values))
         return all[maxIndex][0]
@@ -356,7 +355,7 @@ class Counter(dict):
         >>> a['first']
         1
         """
-        for key, value in y.items():
+        for key, value in sorted(y.items(), lambda x:x[0]):
             self[key] += value
 
     def __add__( self, y ):
@@ -456,7 +455,7 @@ def nSample(distribution, values, n):
 
 def sample(distribution, values = None):
     if type(distribution) == Counter:
-        items = distribution.items()
+        items = sorted(distribution.items(), key=lambda x:x[0])
         distribution = [i[1] for i in items]
         values = [i[0] for i in items]
     if sum(distribution) != 1:
@@ -469,7 +468,7 @@ def sample(distribution, values = None):
     return values[i]
 
 def sampleFromCounter(ctr):
-    items = ctr.items()
+    items = sorted(ctr.items(), key=lambda x:x[0])
     return sample([v for k,v in items], [k for k,v in items])
 
 def getProbability(value, distribution, values):

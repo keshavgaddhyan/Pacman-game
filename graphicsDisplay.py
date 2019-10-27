@@ -148,9 +148,6 @@ class PacmanGraphics:
         self.capture = capture
         self.frameTime = frameTime
 
-    def checkNullDisplay(self):
-        return False
-
     def initialize(self, state, isBlue = False):
         self.isBlue = isBlue
         self.startGraphics(state)
@@ -574,8 +571,6 @@ class PacmanGraphics:
 
     def updateDistributions(self, distributions):
         "Draws an agent's belief distributions"
-        # copy all distributions so we don't change their state
-        distributions = map(lambda x: x.copy(), distributions)
         if self.distributionImages == None:
             self.drawDistributions(self.previousState)
         for x in range(len(self.distributionImages)):
